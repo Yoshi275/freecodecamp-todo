@@ -3,6 +3,7 @@ const { db } = require('../utils/admin');
 exports.getAllTodos = (request, response) => {
     db 
         .collection('todos')
+        .where('username', '==', request.user.username)
         .orderBy('createdAt', 'desc')
         .get()
         .then((data) => {
@@ -59,9 +60,18 @@ exports.deleteTodo = (request, response) => {
     db
         .collection('todos')
         .doc(request.params.todoId)
-        .delete()
-        .then(() => {
-           return response.json({ message: 'Delete successful'});
+        .get()
+        .then((doc) => {
+            if (!doc.exists) {
+                console.log("Document does not exist!");
+                return response.status(404).json({ error: 'Todo not found' });
+            }
+            if (doc.data().username !== request.user.username) {
+                return response.status(403).json({ error: "Unauthorized" });
+            }
+            console.log("Delete successful");
+            db.collection('todos').doc(request.params.todoId).delete();
+            return response.json({ message: 'Delete successful'});
         })
         .catch((err) => {
             console.error(err);
