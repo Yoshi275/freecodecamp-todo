@@ -14,8 +14,8 @@ const {
 } = require('./APIs/users')
 
 // todos
-app.get('/todos', getAllTodos);
-app.post('/todo', postTodo);
+app.get('/todos', auth, getAllTodos);
+app.post('/todo', auth, postTodo);
 app.delete('/todo/:todoId', auth, deleteTodo);
 app.put('/todo/:todoId', auth, editTodo);
 exports.api = functions.https.onRequest(app);
